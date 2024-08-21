@@ -1,11 +1,11 @@
 <?php
 /**
- * Bitcart Checkout 1.0.4
+ * RedWaves Checkout 1.0.4
  *
  * Within the module itself, all functions must be prefixed with the module
  * filename, followed by an underscore, and then the function name. For this
- * example file, the filename is "bitcartcheckout" and therefore all functions
- * begin "bitcartcheckout_".
+ * example file, the filename is "rdwvcheckout" and therefore all functions
+ * begin "rdwvcheckout_".
  *
  * For more information, please refer to the online documentation.
  *
@@ -30,10 +30,10 @@ if (!defined("WHMCS")) {
  * @return array
  */
 
-function bitcartcheckout_MetaData()
+function rdwvcheckout_MetaData()
 {
     return array(
-        'DisplayName' => 'Bitcart_Checkout_WHCMS',
+        'DisplayName' => 'RedWaves_Checkout_WHCMS',
         'APIVersion' => '1.0.4',
         'DisableLocalCreditCardInput' => false,
         'TokenisedStorage' => false,
@@ -63,42 +63,42 @@ function bitcartcheckout_MetaData()
  * @return array
  */
 
-function bitcartcheckout_config()
+function rdwvcheckout_config()
 {
     return array(
         // the friendly display name for a payment gateway should be
         // defined here for backwards compatibility
         'FriendlyName' => array(
             'Type' => 'System',
-            'Value' => 'Bitcart Checkout',
+            'Value' => 'RedWaves Checkout',
         ),
 
-        'bitcart_api_endpoint' => array(
+        'rdwv_api_endpoint' => array(
             'FriendlyName' => 'API Endpoint',
             'Type' => 'text',
             'Default' => '',
-            'Description' => 'Your Bitcart instance\'s Merchants API URL.',
+            'Description' => 'Your RedWaves instance\'s Merchants API URL.',
         ),
 
-        'bitcart_admin_url' => array(
+        'rdwv_admin_url' => array(
             'FriendlyName' => 'Admin URL',
             'Type' => 'text',
             'Default' => '',
-            'Description' => 'Your Bitcart instance\'s Admin Panel URL.',
+            'Description' => 'Your RedWaves instance\'s Admin Panel URL.',
         ),
 
-        'bitcart_admin_url_tor' => array(
+        'rdwv_admin_url_tor' => array(
             'FriendlyName' => 'Admin URL (Tor)',
             'Type' => 'text',
             'Default' => '',
-            'Description' => 'Your Bitcart instance\'s Admin Panel URL (Tor). Will only be used if the WHMCS is accessed via Tor.',
+            'Description' => 'Your RedWaves instance\'s Admin Panel URL (Tor). Will only be used if the WHMCS is accessed via Tor.',
         ),
 
-        'bitcart_store_id' => array(
+        'rdwv_store_id' => array(
             'FriendlyName' => 'Store ID',
             'Type' => 'text',
             'Default' => '',
-            'Description' => 'Store ID of your Bitcart Store.',
+            'Description' => 'Store ID of your RedWaves Store.',
         ),
 
     );
@@ -124,7 +124,7 @@ function send_request($url, $data)
     return json_decode($result);
 }
 
-function bitcartcheckout_link($config_params)
+function rdwvcheckout_link($config_params)
 {
     $curpage = basename($_SERVER["SCRIPT_FILENAME"]);
 
@@ -134,13 +134,13 @@ function bitcartcheckout_link($config_params)
 <?php
 
     // Settings
-    $admin_url_tor = $config_params['bitcart_admin_url_tor'];
-    $admin_url_pub = $config_params['bitcart_admin_url'];
+    $admin_url_tor = $config_params['rdwv_admin_url_tor'];
+    $admin_url_pub = $config_params['rdwv_admin_url'];
 
     $is_tor_enabled = preg_match("/\.onion$/", $_SERVER['HTTP_HOST']) && $admin_url_tor != '';
     $admin_url = $is_tor_enabled ? $admin_url_tor : $admin_url_pub;
 
-    $api_url = strtolower($config_params['bitcart_api_endpoint']);
+    $api_url = strtolower($config_params['rdwv_api_endpoint']);
     // Invoice Parameters
     $invoiceId = $config_params['invoiceid'];
     $amount = $config_params['amount'];
@@ -158,11 +158,11 @@ function bitcartcheckout_link($config_params)
     $protocol = 'https://';
 
     $params->price = $amount;
-    $params->store_id = $config_params['bitcart_store_id'];
+    $params->store_id = $config_params['rdwv_store_id'];
     $params->currency = $currencyCode;
     $params->order_id = trim($invoiceId);
 
-    $params->notification_url = $protocol . $_SERVER['SERVER_NAME'] . $dir . '/modules/gateways/bitcartcheckout/bitcartcheckout_ipn.php';
+    $params->notification_url = $protocol . $_SERVER['SERVER_NAME'] . $dir . '/modules/gateways/rdwvcheckout/rdwvcheckout_ipn.php';
     $params->redirect_url = $params->notificationURL;
 
     $params->buyer_email = $email;
@@ -172,10 +172,10 @@ function bitcartcheckout_link($config_params)
     $invoice = send_request(sprintf('%s/%s', $api_url, 'invoices/order_id/' . urlencode($params->order_id)), $params);
     $invoiceID = $invoice->id;
 
-    $htmlOutput .= '<button name = "bitcart-payment" class = "btn btn-success btn-sm" onclick = "showModal();return false;">' . $langPayNow . '</button>';
+    $htmlOutput .= '<button name = "rdwv-payment" class = "btn btn-success btn-sm" onclick = "showModal();return false;">' . $langPayNow . '</button>';
 
     ?>
-<script src="<?php echo $admin_url; ?>/modal/bitcart.js" type="text/javascript"></script>
+<script src="<?php echo $admin_url; ?>/modal/rdwv.js" type="text/javascript"></script>
 <script type='text/javascript'>
 function showModal() {
     window.addEventListener("message", function(event) {
@@ -185,7 +185,7 @@ function showModal() {
     }, false);
 
     // show the modal
-    bitcart.showInvoice('<?php echo $invoiceID; ?>');
+    rdwv.showInvoice('<?php echo $invoiceID; ?>');
 }
 </script>
 <?php
